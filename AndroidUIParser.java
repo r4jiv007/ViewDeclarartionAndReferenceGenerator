@@ -125,7 +125,7 @@ public class AndroidUIParser {
     private static String extractId(String idAttr) {
 
         int pos = idAttr.lastIndexOf("/");
-        String id = idAttr.substring(pos + 1, idAttr.length() - 1);
+        String id = idAttr.substring(pos + 1, idAttr.length());
         return id;
     }
 	
