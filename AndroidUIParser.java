@@ -5,7 +5,6 @@
  * It will assign id of the view as its name.
  * 
  */
-package androiduiparser;
 
 import java.io.File;
 import java.io.FileInputStream;
