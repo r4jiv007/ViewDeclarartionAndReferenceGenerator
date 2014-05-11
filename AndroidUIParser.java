@@ -99,7 +99,7 @@ public class AndroidUIParser {
             Element childElement = (Element) node;
             if (childElement.getAttribute("android:id") != null
                     && childElement.getAttribute("android:id").length() > 0) {
-                String tagName = childElement.getTagName();
+                String tagName = processTagName(childElement.getTagName());
                 String id = extractId(childElement.getAttribute("android:id"));
                 addToDeclarationList(tagName, id);
                 addToReferenceList(tagName, id);
@@ -108,7 +108,7 @@ public class AndroidUIParser {
             Element childElement = (Element) node;
             if (childElement.getAttribute("android:id") != null
                     && childElement.getAttribute("android:id").length() > 0) {
-                String tagName = childElement.getTagName();
+                String tagName = processTagName(childElement.getTagName());
                 String id = extractId(childElement.getAttribute("android:id"));
                 addToDeclarationList(tagName, id);
                 addToReferenceList(tagName, id);
@@ -129,6 +129,18 @@ public class AndroidUIParser {
         return id;
     }
 	
+	// method to process tagname as some view can contain package name also
+	private static String processTagName(String tagName) {
+        String processedId = null;
+        if (tagName.contains(".")) {
+            int pos = tagName.lastIndexOf(".");
+            processedId = tagName.substring(pos + 1, tagName.length());
+            return processedId;
+        } else {
+            return tagName;
+        }
+    }
+
 	
 	// method to generate and save view declaration statement
     private static void addToDeclarationList(String tagname, String id) {
