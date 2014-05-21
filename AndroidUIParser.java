@@ -30,6 +30,7 @@ import org.xml.sax.SAXException;
  */
 public class AndroidUIParser {
 
+	// declaration related to document parsing 
     private static ArrayList<String> ViewDeclarationList = new ArrayList<String>();
     private static ArrayList<String> ViewReferenceList = new ArrayList<String>();
     private static File XmlFile;
@@ -43,20 +44,30 @@ public class AndroidUIParser {
     private static DocumentBuilder builder;
     private static Document doc;
     // string constants 
-    private static String SPACE = " ";
-    private static String OPENBRACE = "(";
-    private static String ClOSEBRACE = ")";
-    private static String FINDMETHODSTRING = "findViewById";
-    private static String DELIMN = ";";
-    private static String ASIGNMENT = "=";
-    private static String RID = "R.id.";
-
+    private static final String SPACE = " ";
+    private static final String OPENBRACE = "(";
+    private static final String ClOSEBRACE = ")";
+    private static final String FINDMETHODSTRING = "findViewById";
+    private static final String DELIMN = ";";
+    private static final String ASIGNMENT = "=";
+    private static final String RID = "R.id.";
+	
+	// access specifier 
+	private static final String PUBLIC ="public";
+	private static final String PROTECTED="protected";
+	private static final String PRIVATE="private";
+	private static String AccessSpecifier=null;
+	// option holder
+		
+	private static int Option=0;
+	
     public static void main(String[] args) {
-        if (args.length > 0 && (args[0].contains(".xml") || args[0].contains(".XML"))) {
+        if (args.length > 1 && (args[1].contains(".xml") || args[1].contains(".XML"))) {
+			setAccessSpecifier(args[0]);
             factory = DocumentBuilderFactory.newInstance();
             try {
                 builder = factory.newDocumentBuilder();
-                currentFilePath = args[0];
+                currentFilePath = args[1];
                 XmlFile = new File(currentFilePath);
                 doc = builder.parse(XmlFile);
                 Element rootElement = doc.getDocumentElement();
@@ -65,11 +76,15 @@ public class AndroidUIParser {
                 extractNodeName(rootNode);
 
                 int numDec = ViewDeclarationList.size();
+				// printing view declaration
+				System.out.println("*********** view declaration ***********\n");
                 for (int i = 0; i < numDec; i++) {
                     System.out.println(ViewDeclarationList.get(i));
                 }
                 System.out.println();
 
+				System.out.println("*********** view reference ***********\n");
+                
                 for (int i = 0; i < numDec; i++) {
                     System.out.println(ViewReferenceList.get(i));
                 }
@@ -85,18 +100,18 @@ public class AndroidUIParser {
             }
 
         } else {
-            System.out.println("Please Provide path to xml file ");
+			printUsageMethod();
         }
 
     }
 
 	// recursive method to traverse XML structure and extract view element 
-	
-    private static void extractNodeName(Node node) {
+	private static void extractNodeName(Node node) {
         if (!(node instanceof Element)) {
             return;
         } else if (!node.hasChildNodes()) {
             Element childElement = (Element) node;
+			
             if (childElement.getAttribute("android:id") != null
                     && childElement.getAttribute("android:id").length() > 0) {
                 String tagName = processTagName(childElement.getTagName());
@@ -121,6 +136,38 @@ public class AndroidUIParser {
         }
     }
 
+	
+	// method to extract option
+	private static void setAccessSpecifier(String optionString){
+			if(optionString.contains("-") && optionString.length()==2){
+				int pos = optionString.lastIndexOf("-");
+				int as = Integer.parseInt(optionString.substring(pos+1,optionString.length()));
+				switch(as){
+					
+					case 1: AccessSpecifier = PRIVATE +SPACE; break;
+					case 2: AccessSpecifier = PROTECTED+SPACE; break;
+					case 3: AccessSpecifier = ""; break;
+					case 4: AccessSpecifier = PUBLIC +SPACE; break;
+				
+				
+				}
+				
+			}else{
+				printUsageMethod();
+				System.exit(0);
+			}
+	
+	}
+	
+	private static void printUsageMethod(){
+	 System.out.println("Usage:- java AndroidUIParser [-option] <Xml File Name> \n"+ 
+											"options:-\n 1 : for declaring Views as private"+
+											"\n 2 : for declaring Views as protected"+
+											"\n 3 : for declaring Views as default"+
+											"\n 4 : for declaring Views as public");
+	
+	}
+	
 	// method to extract id from provided attribute value
     private static String extractId(String idAttr) {
 
@@ -144,17 +191,20 @@ public class AndroidUIParser {
 	
 	// method to generate and save view declaration statement
     private static void addToDeclarationList(String tagname, String id) {
-        String declaration = tagname + SPACE + id + DELIMN;
+        String declaration = AccessSpecifier+tagname + SPACE + id + DELIMN;
         // System.out.println(declaration);
         ViewDeclarationList.add(declaration);
     }
 
 	// method to generate and save reference statement
     private static void addToReferenceList(String tagname, String id) {
-        String reference = id + SPACE + ASIGNMENT + OPENBRACE + tagname + ClOSEBRACE + FINDMETHODSTRING + OPENBRACE + RID
+        String reference = id + SPACE + ASIGNMENT +SPACE+ OPENBRACE + tagname + ClOSEBRACE + FINDMETHODSTRING + OPENBRACE + RID
                 + id + ClOSEBRACE + DELIMN;
 
         //   System.out.println(reference);
         ViewReferenceList.add(reference);
     }
+	
+	
+	
 }
